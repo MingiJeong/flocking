@@ -15,7 +15,10 @@ define turtlebot position
   pose [ 0.0 0.0 0.0 0.0 ]
   localization "gps"  
 
-  size [ 0.3 0.3 0.4 ]
+  velocity_bounds [-2 2 -1 1 -1 1 -90 90 ]					
+  acceleration_bounds [-2 2 -1 1 -1 1 -90 90]
+
+  size [ 0.4 0.3 0.3]
   origin [ 0.0 0.0 0.0 0.0 ]
   gui_nose 1
   drive "diff"

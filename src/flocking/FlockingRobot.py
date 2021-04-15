@@ -23,14 +23,15 @@ DEFAULT_GT_TOPIC = 'ground_truth/state'
 DEFAULT_SCAN_TOPIC_STAGE = 'base_scan'
 DEFAULT_GT_TOPIC_STAGE = 'base_pose_ground_truth'
 
-MIN_THRESHOLD_DISTANCE = 1 # m, threshold distance.
-LASER_ANGLE_LEFT = math.pi/4 # Gazebo
-LASER_ANGLE_RIGHT = 7* math.pi/4 # Gazebo
+MIN_THRESHOLD_DISTANCE_ALL = 1 # m, threshold distance. 0.7
+MIN_THRESHOLD_DISTANCE_FRONT = 1 # m, threshold distance. 1
+LASER_ANGLE_LEFT = math.pi * 1/4 # Gazebo 1/4  9/16  1/3 
+LASER_ANGLE_RIGHT = math.pi * 7/4 # Gazebo 7/4 23 /16  5/3
 
 class FlockingRobot():
     def __init__(self, robot_name, simul_gazebo, robot_total):
         """ Constructor """
-        self.robot_name = robot_name # own robot ID
+        self.robot_name = robot_name # own robot ID (int)
         self.simul_gazebo = simul_gazebo # flag: using gazebo or not (i.e., stage)
         self.robot_total = robot_total # total number of robot on scene (assumption > |# of own robot|)
         self.own_heading = None
@@ -58,35 +59,51 @@ class FlockingRobot():
                 rospy.Subscriber('robot_{}'.format(str(i)) + "/" + DEFAULT_GT_TOPIC_STAGE, Odometry, callback = self._gt_call_back, callback_args=i)
         
         # get params from .yaml file via param server
-        # self.linear_velocity = rospy.get_param('~LINEAR_VELOCITY')
-        # self.angular_velocity = rospy.get_param('~ANGULAR_VELOCITY') * math.pi
         self.rate = rospy.Rate(rospy.get_param('~FREQUENCY'))
-        
         self.cohesion_coff = rospy.get_param('~COHESION_COEFF')
         self.separation_coff = rospy.get_param('~SEPARATION_COEFF')
         self.alignment_coff = rospy.get_param('~ALIGNMENT_COEFF')
         self.scaling_pos = rospy.get_param('~SCALING_POS')
         self.scailing_ang = rospy.get_param('~SCALING_ANG')
 
+        self.evacuate_spd = random.choice([-0.3,0.3])
+
     def _laser_call_back(self, msg):
         """Processing of laser message."""
         # Access to the index of the measurement of the robot.
-        # i = int((LASER_ANGLE_LEFT - msg.angle_min) / msg.angle_increment)
-        # j = int((LASER_ANGLE_RIGHT - msg.angle_min) / msg.angle_increment)
+        if self.simul_gazebo: # GAZEBO environment
+            i = int((LASER_ANGLE_LEFT - msg.angle_min) / msg.angle_increment)
+            j = int((LASER_ANGLE_RIGHT - msg.angle_min) / msg.angle_increment)
 
-        # print("index {}".format((i,j)))
-        # min_dist = min(msg.ranges[i:j])
-        min_dist = min(msg.ranges)
-        print("min dist {}".format(min_dist))
+            front_left = min(msg.ranges[0:i+1])
+            front_right = min(msg.ranges[j:])
+            front_dist = min(front_left, front_right)  # min front side distance
 
-        if min_dist <= MIN_THRESHOLD_DISTANCE:
-            self.control_state = 1
-            print("{} Too close, reduce speed!".format(self.robot_name))
-            self.slow_down()
+        else: # STAGE environment
+            i = int((-LASER_ANGLE_LEFT - msg.angle_min) / msg.angle_increment)
+            j = int((LASER_ANGLE_RIGHT - msg.angle_min) / msg.angle_increment)
+
+            front_dist = min(msg.ranges[i:j+1]) # min front side distance
+
+        overall_min_dist = min(msg.ranges)  # overall min distance (full angle)
+
+        # overall distance and front distance are less than threshold (consider it will collide)
+        # example: robot1 detect robot2 behind it very close, but nothing ahead. 
+        #          robot1 does not need to take the evacuate action, i.e., can go ahead
+        #          robot2 has robot1 in the front; need to take the evacuate action.
+        if overall_min_dist <= MIN_THRESHOLD_DISTANCE_ALL and front_dist <= MIN_THRESHOLD_DISTANCE_FRONT:
+            self.control_state = 1  # collision avoidance initiate / flock stop for a while
+            self.evacuate(front_dist)
+
+        # condition not met: all clear => flocking
         else:
             self.control_state = 0
 
     def _gt_call_back(self, msg, robot_name):
+        """
+        function to subscribe ground truth of robot members (own robot + the rest)
+        - arg: robot_name to be used mapping heading data, position data for own (plain) or others (hash-map)
+        """
         # Quaterinion to Euler
         orientation_q = msg.pose.pose.orientation
         orientation_list = [orientation_q.x, orientation_q.y, orientation_q.z, orientation_q.w]
@@ -102,16 +119,21 @@ class FlockingRobot():
             self.own_position = np.array([msg.pose.pose.position.x, msg.pose.pose.position.y])
 
     def alignment(self):
+        """
+        function to make the robot align with average heading of the rest members
+        """
         # average heading vector which will be normalized in the end      
         vec = np.array([0, 0])
         for other_hdg in self.other_heading.values():
             other_unit_vec = np.array([math.cos(other_hdg), math.sin(other_hdg)])
-            vec = vec + other_unit_vec
+            vec = vec + other_unit_vec  # add
         
-        # return normalized vector for alignment
+        # return normalized (averaging effect) vector for alignment
         return normalize(vec)
 
     def cohesion(self):
+        """
+        """
         # average position vector which will be normalized in the end
         vec = np.array([0, 0])
 
@@ -150,10 +172,16 @@ class FlockingRobot():
         return self.own_position
 
     def flocking_combination(self):
+        """
+        function to achieve flocking behaviors consisting of the sub-modules:
+            1) alignment 2) cohesion 3) separation
+        """
         # twist message initialization
         twist_msg = Twist()
 
+        # All data receiving conditions are met
         if len(self.other_heading) == self.robot_total - 1 and self.own_heading is not None and self.control_state == 0:
+            
             # =========================================================
             # 1. Alignment 
             # =========================================================
@@ -163,20 +191,15 @@ class FlockingRobot():
             # =========================================================
             # 2. Cohesion
             # =========================================================
-            # cohesion_avg_vec = self.cohesion() # other robots' avg position vector
-            # own_psn_vec = self.get_own_psn_vector() # my current position vector
-            # cohesion_vec = normalize(cohesion_avg_vec - own_psn_vec)   
-
             cohesion_vec = self.cohesion() 
 
             # =========================================================
             # 3. Separation 
             # =========================================================
             separation_vec = self.separation()
-            # print("separation vec {}".format(separation_vec))
             
             # =========================================================
-            # 4. Final
+            # 4. Final output
             # =========================================================
             sum_vec = normalize(
                 self.alignment_coff * alignment_vec 
@@ -189,41 +212,42 @@ class FlockingRobot():
             # adjust_angle = check_vector_angle(own_hdg_vec, alignment_vec)
 
             # linear component
-            # adjust_position = np.linalg.norm(sum_vec - own_psn_vec)
             adjust_position = np.linalg.norm(
                 self.cohesion_coff * cohesion_vec 
                 + self.separation_coff * separation_vec
                 )
+            # adjust_position = np.linalg.norm(sum_vec - own_psn_vec)
 
-            # TODO error angle and x all based on the all aggregated vector
+            # adjust with scaling coefficient
             twist_msg.linear.x = self.scaling_pos * adjust_position
             twist_msg.angular.z = self.scailing_ang * adjust_angle
             
+            # final output of cmd_vel message
             self._cmd_pub.publish(twist_msg)
+
+    
+    def evacuate(self, front_dist):
+        """
+        function to make the robot evacuate from colliding with each other while flocking
+        """
+        twist_msg = Twist()
+        twist_msg.angular.z = self.evacuate_spd # randomly chosen direction per robot 
+
+        self._cmd_pub.publish(twist_msg)
+        self.rate.sleep()
+
+        # front is clear and the robot can go ahead!
+        if front_dist > MIN_THRESHOLD_DISTANCE_FRONT:
+            self.control_state = 0 # clear and flocking resume
 
 
     def spin(self):
+        """
+        main looping function
+        """
         while not rospy.is_shutdown():
             # flocking
             self.flocking_combination()
 
             # Sleep to keep the set publishing frequency.
             self.rate.sleep()
-
-    
-    def stop(self):
-        """
-        function to stop the robot by linear and angular velocity all zeros
-        """
-        twist_msg = Twist()
-        self._cmd_pub.publish(twist_msg)
-
-    def slow_down(self):
-        """
-        function to stop the robot by linear and angular velocity all zeros
-        """
-        slow_down_spd = random.uniform(0.02, 0.1)
-        twist_msg = Twist()
-        twist_msg.linear.x = slow_down_spd
-        self._cmd_pub.publish(twist_msg)
-        self.rate.sleep()

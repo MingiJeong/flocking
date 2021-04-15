@@ -18,6 +18,7 @@ from flocking.FlockingRobot import FlockingRobot
 
 def main():
     """ Main function """
+    """ each robot will be executing this node by robot_load.launch"""
 
     # initialization of node
     rospy.init_node("flocking")
