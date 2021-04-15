@@ -1,0 +1,118 @@
+include "flocking_stage.inc"
+
+define floorplan model
+(
+  # sombre, sensible, artistic
+  color "gray30"
+
+  # most maps will need a bounding box
+  boundary 1
+
+  gui_nose 0
+  gui_grid 0
+  gui_outline 0
+  gripper_return 0
+  fiducial_return 0
+  laser_return 1
+)
+
+resolution 0.1
+interval_sim 10  # simulation timestep in milliseconds
+
+window
+(
+  size [ 1000.0 1000.0 ]
+  center [ 0.0 0.0 ]
+  rotate [ 0.0 0.0 ]
+  scale 20
+
+  show_data 1
+)
+
+floorplan
+(
+  name "flocking"
+  bitmap "empty.pgm"
+  size [ 300 300 1.0 ]
+  pose [ 0.0 0.0 0.0 0.0 ]
+)
+
+# throw in a turtlebot 1st
+turtlebot
+(
+  pose [ 0.0 0.0 0.0 0.0 ]
+  name "turtlebot0"
+  color "blue"
+)
+
+# throw in a turtlebot 2nd
+turtlebot
+(
+  pose [ 10.0 0.0 0.0 45.0 ]
+  name "turtlebot1"
+  color "green"
+)
+
+# throw in a turtlebot 3rd
+turtlebot
+(
+  pose [ -10.0 0.0 0.0 90.0 ]
+  name "turtlebot2"
+  color "yellow"
+)
+
+# throw in a turtlebot 4th
+turtlebot
+(
+  pose [ 0.0 10.0 0.0 135.0 ]
+  name "turtlebot3"
+  color "purple"
+)
+
+# throw in a turtlebot 5th
+turtlebot
+(
+  pose [ 0.0 -10.0 0.0 180.0 ]
+  name "turtlebot4"
+  color "red"
+)
+
+# throw in a turtlebot 6th
+turtlebot
+(
+  pose [ 20.0 0.0 0.0 225.0 ]
+  name "turtlebot5"
+  color "blue"
+)
+
+# throw in a turtlebot 7th
+turtlebot
+(
+  pose [ -20.0 0.0 0.0 270.0 ]
+  name "turtlebot6"
+  color "green"
+)
+
+# throw in a turtlebot 8th
+turtlebot
+(
+  pose [ 0.0 20.0 0.0 315.0 ]
+  name "turtlebot7"
+  color "yellow"
+)
+
+# throw in a turtlebot 9th
+turtlebot
+(
+  pose [ 0.0 -20.0 0.0 0.0 ]
+  name "turtlebot8"
+  color "purple"
+)
+
+# throw in a turtlebot 10th
+turtlebot
+(
+  pose [ 10.0 10.0 0.0 20.0 ]
+  name "turtlebot9"
+  color "red"
+)

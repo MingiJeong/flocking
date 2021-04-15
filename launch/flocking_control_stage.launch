@@ -1,0 +1,74 @@
+<launch>
+    <!-- lunaching arguments passed for each node -->
+    <arg name="first_robot"  default="0"/>
+    <arg name="second_robot" default="1"/>
+    <arg name="third_robot"  default="2"/>
+    <arg name="forth_robot"  default="3"/>
+    <arg name="fifth_robot" default="4"/>
+    <arg name="sixth_robot"  default="5"/>
+    <arg name="seventh_robot"  default="6"/>
+    <arg name="eighth_robot" default="7"/>
+    <arg name="ninth_robot"  default="8"/>
+    <arg name="tenth_robot"  default="9"/>
+
+    <arg name="simul_gazebo" default="false"/>
+
+    <!-- 1st robot -->
+    <include file="$(find flocking)/launch/robot_load.launch">
+        <arg name="robot_id" value="$(arg first_robot)" />
+        <arg name="simul_gazebo" value="$(arg simul_gazebo)" />
+    </include>
+
+    <!-- 2nd robot -->
+    <include file="$(find flocking)/launch/robot_load.launch">
+        <arg name="robot_id" value="$(arg second_robot)" />
+        <arg name="simul_gazebo" value="$(arg simul_gazebo)" />
+    </include>
+
+    <!-- 3rd robot -->
+    <include file="$(find flocking)/launch/robot_load.launch">
+        <arg name="robot_id" value="$(arg third_robot)" />
+        <arg name="simul_gazebo" value="$(arg simul_gazebo)" />
+    </include>
+
+    <!-- 4th robot -->
+    <include file="$(find flocking)/launch/robot_load.launch">
+        <arg name="robot_id" value="$(arg forth_robot)" />
+        <arg name="simul_gazebo" value="$(arg simul_gazebo)" />
+    </include>
+
+    <!-- 5th robot -->
+    <include file="$(find flocking)/launch/robot_load.launch">
+        <arg name="robot_id" value="$(arg fifth_robot)" />
+        <arg name="simul_gazebo" value="$(arg simul_gazebo)" />
+    </include>
+
+    <!-- 6th robot -->
+    <include file="$(find flocking)/launch/robot_load.launch">
+        <arg name="robot_id" value="$(arg sixth_robot)" />
+        <arg name="simul_gazebo" value="$(arg simul_gazebo)" />
+    </include>
+    <!-- 7th robot -->
+    <include file="$(find flocking)/launch/robot_load.launch">
+        <arg name="robot_id" value="$(arg seventh_robot)" />
+        <arg name="simul_gazebo" value="$(arg simul_gazebo)" />
+    </include>
+
+    <!-- 8th robot -->
+    <include file="$(find flocking)/launch/robot_load.launch">
+        <arg name="robot_id" value="$(arg eighth_robot)" />
+        <arg name="simul_gazebo" value="$(arg simul_gazebo)" />
+    </include>
+
+    <!-- 9th robot -->
+    <include file="$(find flocking)/launch/robot_load.launch">
+        <arg name="robot_id" value="$(arg ninth_robot)" />
+        <arg name="simul_gazebo" value="$(arg simul_gazebo)" />
+    </include>
+
+    <!-- 10th robot -->
+    <include file="$(find flocking)/launch/robot_load.launch">
+        <arg name="robot_id" value="$(arg tenth_robot)" />
+        <arg name="simul_gazebo" value="$(arg simul_gazebo)" />
+    </include>
+</launch>

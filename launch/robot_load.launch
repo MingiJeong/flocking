@@ -1,0 +1,27 @@
+<launch>
+    <!-- launching arguments passed for main task -->
+    <arg name="robot_id" default=''/>
+    <arg name="simul_gazebo" default=''/>
+
+    <!-- main robot load node -->
+    <group if="$(arg simul_gazebo)">
+        <!-- if gazebo simulation true -->
+        <node pkg="flocking" type="flocking_behavior" name="flock_robot_node_$(arg robot_id)" output="screen">
+            <param name="robot_id" value="$(arg robot_id)"/>
+            <param name="simul_gazebo" value="$(arg simul_gazebo)"/>
+            <rosparam file="$(find flocking)/param/gazebo_flock.yaml" command="load"/>
+            <rosparam file="$(find flocking)/param/common_param.yaml" command="load"/>
+        </node>
+    </group>
+
+    <group unless="$(arg simul_gazebo)">
+        <!-- if gazebo simulation false -->
+        <node pkg="flocking" type="flocking_behavior" name="flock_robot_node_$(arg robot_id)" output="screen">
+            <param name="robot_id" value="$(arg robot_id)"/>
+            <param name="simul_gazebo" value="$(arg simul_gazebo)"/>
+            <rosparam file="$(find flocking)/param/stage_flock.yaml" command="load"/>
+            <rosparam file="$(find flocking)/param/common_param.yaml" command="load"/>
+        </node>
+    </group>
+
+</launch>

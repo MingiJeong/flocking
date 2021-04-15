@@ -1,0 +1,26 @@
+<launch>
+    <!-- lunaching arguments passed for each node -->
+    <arg name="first_tb3"  default="0"/>
+    <arg name="second_tb3" default="1"/>
+    <arg name="third_tb3"  default="2"/>
+    <arg name="simul_gazebo" default="true"/>
+
+    <!-- 1st robot -->
+    <include file="$(find flocking)/launch/robot_load.launch">
+        <arg name="robot_id" value="$(arg first_tb3)" />
+        <arg name="simul_gazebo" value="$(arg simul_gazebo)" />
+    </include>
+
+    <!-- 2nd robot -->
+    <include file="$(find flocking)/launch/robot_load.launch">
+        <arg name="robot_id" value="$(arg second_tb3)" />
+        <arg name="simul_gazebo" value="$(arg simul_gazebo)" />
+    </include>
+
+    <!-- 3rd robot -->
+    <include file="$(find flocking)/launch/robot_load.launch">
+        <arg name="robot_id" value="$(arg third_tb3)" />
+        <arg name="simul_gazebo" value="$(arg simul_gazebo)" />
+    </include>
+
+</launch>

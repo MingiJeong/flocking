@@ -1,0 +1,48 @@
+#!/usr/bin/env python
+
+# import of python modules
+import math
+import numpy as np
+
+# import of relevant libraries
+import rospy # module for ROS APIs
+from geometry_msgs.msg import Twist
+from std_msgs.msg import Float32
+from nav_msgs.msg import Odometry
+from sensor_msgs.msg import LaserScan
+from tf.transformations import euler_from_quaternion, quaternion_from_euler
+
+# import custom modules
+from flocking.FlockingRobot import FlockingRobot
+
+
+def main():
+    """ Main function """
+
+    # initialization of node
+    rospy.init_node("flocking")
+
+    # Sleep for a few seconds to wait for the registration.
+    rospy.sleep(2)
+
+    # get params of robot via param server (designate type exlicitly in case of errors)
+    robot_id = int(rospy.get_param('~robot_id')) 
+    simul_gazebo = bool(rospy.get_param('~simul_gazebo'))
+    robot_total = int(rospy.get_param('~robot_total'))
+
+    # Initialization of the robot class for flocking
+    flocking_robot = FlockingRobot(robot_id, simul_gazebo, robot_total)
+
+    # If interrupted, send a stop command.
+    rospy.on_shutdown(flocking_robot.stop)
+
+    # Robot start drawing the regular polygon shape!
+    try:
+        flocking_robot.spin()
+        # flocking_robot.move_forward(5)
+    except rospy.ROSInterruptException:
+        rospy.logerr("ROS node interrupted.")
+
+if __name__ == "__main__":
+    """Run the main function."""
+    main()

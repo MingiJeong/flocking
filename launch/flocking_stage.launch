@@ -1,0 +1,9 @@
+<launch>
+    <arg name="stage_folder" default="$(find flocking)/worlds"/>
+    <arg name="start_delay" default="2.0" />
+    <arg name="world_file" default="flocking_stage.world" />
+
+    <!-- rosstage node -->
+    <node pkg="stage_ros" type="stageros" name="stageros" output="screen" args="-d $(arg stage_folder)/$(arg world_file)"/>
+
+</launch>
