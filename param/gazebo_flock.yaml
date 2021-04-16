@@ -1,6 +1,6 @@
 robot_total: 3
-ALIGNMENT_COEFF: 2 # 2
-COHESION_COEFF: 2.6 # 2
-SEPARATION_COEFF: 1.5  # 1.7
-SCALING_POS: 0.3  # 0.3
-SCALING_ANG: 0.4  # 0.4
+Alignment_Coeff: 2 # 2
+Cohesion_Coff: 2.6 # 2
+Separation_Coff: 1.5  # 1.7
+Scaling_Pos: 0.3  # 0.3
+Scaling_Ang: 0.4  # 0.4

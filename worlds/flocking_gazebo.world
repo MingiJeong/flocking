@@ -35,11 +35,6 @@ https://github.com/ROBOTIS-GIT/turtlebot3_simulations/blob/master/turtlebot3_gaz
       </ode>
     </physics>
 
-    <!-- Load world -->
-    <!-- <include>
-      <uri>model://flocking_square</uri>
-    </include> -->
-
     <scene>
       <ambient>0.4 0.4 0.4 1</ambient>
       <background>0.7 0.7 0.7 1</background>

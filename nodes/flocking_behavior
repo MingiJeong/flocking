@@ -1,16 +1,7 @@
 #!/usr/bin/env python
 
-# import of python modules
-import math
-import numpy as np
-
 # import of relevant libraries
 import rospy # module for ROS APIs
-from geometry_msgs.msg import Twist
-from std_msgs.msg import Float32
-from nav_msgs.msg import Odometry
-from sensor_msgs.msg import LaserScan
-from tf.transformations import euler_from_quaternion, quaternion_from_euler
 
 # import custom modules
 from flocking.FlockingRobot import FlockingRobot
